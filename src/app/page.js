@@ -20,10 +20,27 @@ export default function Home() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isPIP, setIsPIP] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+
+  const handleVolumeChange = (event) => {
+    // console.log("volume change", videoRef?.current?.volume);
+    event.stopPropagation();
+    let volumeLevel = event.target.value;
+    setVolume(volumeLevel);
+    videoRef.current.volume = event.target.value; // Set the volume level
+
+    // If volume level is 0, set isMuted to true
+    if (volumeLevel == 0) {
+      setIsMuted(true);
+    } else {
+      setIsMuted(false);
+    }
+  };
 
   const togglePlayPause = (event) => {
-    console.log("play pause");
+    // console.log("play pause", videoRef?.current?.volume);
     event.stopPropagation();
+    // If video is paused then make it play and vice versa
     if (videoRef?.current?.paused) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -62,6 +79,12 @@ export default function Home() {
     event.stopPropagation();
     videoRef.current.muted = !videoRef.current.muted;
     setIsMuted(videoRef.current.muted);
+
+    if (videoRef.current.muted) {
+      setVolume(0);
+    } else {
+      setVolume(videoRef?.current?.volume);
+    }
   };
 
   return (
@@ -77,6 +100,7 @@ export default function Home() {
           <source src={video} type="video/mp4" />
         </video>
         <Controls
+          volume={volume}
           isPIP={isPIP}
           isMuted={isMuted}
           isPlaying={isPlaying}
@@ -85,6 +109,7 @@ export default function Home() {
           toggleFullScreen={toggleFullScreen}
           togglePIP={togglePIP}
           toggleMute={toggleMute}
+          handleVolumeChange={handleVolumeChange}
         />
       </div>
     </div>
@@ -92,6 +117,7 @@ export default function Home() {
 }
 
 const Controls = ({
+  volume,
   isPIP,
   isMuted,
   isPlaying,
@@ -100,6 +126,7 @@ const Controls = ({
   togglePlayPause,
   togglePIP,
   toggleMute,
+  handleVolumeChange,
 }) => {
   return (
     <div
@@ -140,6 +167,8 @@ const Controls = ({
           min="0"
           max="1"
           className="z-50"
+          value={volume}
+          onChange={handleVolumeChange}
         />
       </div>
 
