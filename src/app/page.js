@@ -7,6 +7,10 @@ import {
   ExitFullScreenIcon,
   DesktopIcon,
   LaptopIcon,
+  SpeakerLoudIcon,
+  SpeakerOffIcon,
+  SpeakerQuietIcon,
+  SpeakerModerateIcon,
 } from "@radix-ui/react-icons";
 import video from "../../assets/telegram.mp4";
 
@@ -15,8 +19,11 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isPIP, setIsPIP] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = (event) => {
+    console.log("play pause");
+    event.stopPropagation();
     if (videoRef?.current?.paused) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -26,7 +33,9 @@ export default function Home() {
     }
   };
 
-  const toggleFullScreen = () => {
+  const toggleFullScreen = (event) => {
+    console.log("full screen");
+    event.stopPropagation();
     if (document?.fullscreenElement === null) {
       videoRef.current.requestFullscreen();
       setIsFullScreen(true);
@@ -36,7 +45,9 @@ export default function Home() {
     }
   };
 
-  const togglePIP = () => {
+  const togglePIP = (event) => {
+    console.log("pip");
+    event.stopPropagation();
     if (!document?.pictureInPictureElement) {
       videoRef.current.requestPictureInPicture();
       setIsPIP(true);
@@ -44,6 +55,13 @@ export default function Home() {
       document.exitPictureInPicture();
       setIsPIP(false);
     }
+  };
+
+  const toggleMute = (event) => {
+    console.log("mute");
+    event.stopPropagation();
+    videoRef.current.muted = !videoRef.current.muted;
+    setIsMuted(videoRef.current.muted);
   };
 
   return (
@@ -60,11 +78,13 @@ export default function Home() {
         </video>
         <Controls
           isPIP={isPIP}
+          isMuted={isMuted}
           isPlaying={isPlaying}
           isFullScreen={isFullScreen}
           togglePlayPause={togglePlayPause}
           toggleFullScreen={toggleFullScreen}
           togglePIP={togglePIP}
+          toggleMute={toggleMute}
         />
       </div>
     </div>
@@ -73,23 +93,54 @@ export default function Home() {
 
 const Controls = ({
   isPIP,
+  isMuted,
   isPlaying,
   isFullScreen,
   toggleFullScreen,
   togglePlayPause,
   togglePIP,
+  toggleMute,
 }) => {
   return (
     <div
-      className={`py-3 w-full px-3 flex justify-between absolute  bottom-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75  bg-black/20 z-50 
-      ${isFullScreen && "fixed w-full h-full"} ${isPlaying && "opacity-0"}`}
+      className={`py-3 w-full px-3 flex justify-between absolute bottom-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75  bg-black/20 z-50
+      ${isPlaying && "opacity-0"}`}
     >
-      <div onClick={togglePlayPause} className="cursor-pointer">
-        {isPlaying ? (
-          <PauseIcon color="white" width={24} height={24} />
-        ) : (
-          <PlayIcon color="white" width={24} height={24} />
-        )}
+      <div className="flex gap-4">
+        <div onClick={togglePlayPause} className="cursor-pointer">
+          {isPlaying ? (
+            <PauseIcon color="white" width={24} height={24} />
+          ) : (
+            <PlayIcon color="white" width={24} height={24} />
+          )}
+        </div>
+
+        <div className="cursor-pointer flex">
+          {isMuted ? (
+            <SpeakerOffIcon
+              onClick={toggleMute}
+              color="white"
+              width={24}
+              height={24}
+            />
+          ) : (
+            <SpeakerQuietIcon
+              onClick={toggleMute}
+              color="white"
+              width={24}
+              height={24}
+            />
+          )}
+        </div>
+        <input
+          name="points"
+          type="range"
+          id="points"
+          step={"any"}
+          min="0"
+          max="1"
+          className="z-50"
+        />
       </div>
 
       <div className="flex gap-4">
