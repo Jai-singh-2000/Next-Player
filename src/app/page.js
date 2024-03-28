@@ -16,6 +16,7 @@ import video from "../../assets/telegram.mp4";
 
 export default function Home() {
   const videoRef = useRef(null);
+  const videoContainerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isPIP, setIsPIP] = useState(false);
@@ -60,7 +61,7 @@ export default function Home() {
 
     // If the video is not in full screen mode then request for full screen. Otherwise, exit it.
     if (document?.fullscreenElement === null) {
-      videoRef.current.requestFullscreen();
+      videoContainerRef.current.requestFullscreen();
       setIsFullScreen(true);
     } else {
       document.exitFullscreen();
@@ -99,13 +100,17 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center items-center bg-gradient-to-r from-slate-800 to-gray-700 ">
-      <div className="relative group max-h-[100svh]" onClick={togglePlayPause}>
+    <div className="flex justify-center items-center">
+      <div
+        ref={videoContainerRef}
+        className="relative group max-h-[100svh] max-w-[1000px] bg-black w-full flex justify-center"
+        onClick={togglePlayPause}
+      >
         <video
           ref={videoRef}
           controls={false}
-          width="1000"
-          height="800"
+          width="100%"
+          height={isFullScreen ? "100vh" : "800"}
           className="rounded-md pointer-events-none"
         >
           <source src={video} type="video/mp4" />
@@ -141,7 +146,7 @@ const Controls = ({
 }) => {
   return (
     <div
-      className={`py-3 w-full px-3 flex justify-between absolute bottom-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75  bg-black/20 z-50
+      className={`py-2 w-full px-3 flex justify-between absolute bottom-0 left-0 right-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/50 z-[100]
       ${isPlaying && "opacity-0"}`}
     >
       <div className="flex gap-4">
