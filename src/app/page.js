@@ -25,6 +25,7 @@ export default function Home() {
   const handleVolumeChange = (event) => {
     // console.log("volume change", videoRef?.current?.volume);
     event.stopPropagation();
+
     let volumeLevel = event.target.value;
     setVolume(volumeLevel);
     videoRef.current.volume = event.target.value; // Set the volume level
@@ -39,7 +40,9 @@ export default function Home() {
 
   const togglePlayPause = (event) => {
     // console.log("play pause", videoRef?.current?.volume);
+
     event.stopPropagation();
+
     // If video is paused then make it play and vice versa
     if (videoRef?.current?.paused) {
       videoRef.current.play();
@@ -51,8 +54,11 @@ export default function Home() {
   };
 
   const toggleFullScreen = (event) => {
-    console.log("full screen");
+    // console.log("full screen");
+
     event.stopPropagation();
+
+    // If the video is not in full screen mode then request for full screen. Otherwise, exit it.
     if (document?.fullscreenElement === null) {
       videoRef.current.requestFullscreen();
       setIsFullScreen(true);
@@ -63,8 +69,10 @@ export default function Home() {
   };
 
   const togglePIP = (event) => {
-    console.log("pip");
+    // console.log("pip");
     event.stopPropagation();
+
+    // If video is not in picture in picture mode then request for it. Otherwise, exit it.
     if (!document?.pictureInPictureElement) {
       videoRef.current.requestPictureInPicture();
       setIsPIP(true);
@@ -75,11 +83,14 @@ export default function Home() {
   };
 
   const toggleMute = (event) => {
-    console.log("mute");
+    // console.log("mute");
     event.stopPropagation();
+
+    // If video is muted then unmute it and vice versa.
     videoRef.current.muted = !videoRef.current.muted;
     setIsMuted(videoRef.current.muted);
 
+    // If video is muted, set volume to 0. Otherwise, set it to the current volume.
     if (videoRef.current.muted) {
       setVolume(0);
     } else {
@@ -93,8 +104,8 @@ export default function Home() {
         <video
           ref={videoRef}
           controls={false}
-          width="500"
-          height="300"
+          width="1000"
+          height="800"
           className="rounded-md pointer-events-none"
         >
           <source src={video} type="video/mp4" />
@@ -143,8 +154,22 @@ const Controls = ({
         </div>
 
         <div className="cursor-pointer flex">
-          {isMuted ? (
+          {isMuted || volume === 0 ? (
             <SpeakerOffIcon
+              onClick={toggleMute}
+              color="white"
+              width={24}
+              height={24}
+            />
+          ) : volume > 0.8 ? (
+            <SpeakerLoudIcon
+              onClick={toggleMute}
+              color="white"
+              width={24}
+              height={24}
+            />
+          ) : volume > 0.4 ? (
+            <SpeakerModerateIcon
               onClick={toggleMute}
               color="white"
               width={24}
