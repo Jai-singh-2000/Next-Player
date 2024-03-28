@@ -22,9 +22,36 @@ export default function Home() {
   const [isPIP, setIsPIP] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
+  const [currentDuration, setCurrentDuration] = useState("00:00");
+
+  const getTotalDuration = () => {
+    const time = formatDuration(videoRef?.current?.duration);
+    console.log(time, "total time");
+  };
+
+  const getCurrentDuration = () => {
+    const time = formatDuration(videoRef?.current?.currentTime);
+    setCurrentDuration(time);
+  };
+
+  const formatDuration = (time) => {
+    const seconds = Math.floor(time % 60);
+    const minutes = Math.floor(time / 60) % 60;
+    const hours = Math.floor(time / 3600);
+
+    if (hours === 0) {
+      return `${minutes < 10 ? "0" : ""}${minutes}:${
+        seconds < 10 ? "0" : ""
+      }${seconds}`;
+    } else {
+      return `${hours < 10 ? "0" : ""}${hours}:${
+        minutes < 10 ? "0" : ""
+      }${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    }
+  };
 
   const handleVolumeChange = (event) => {
-    // console.log("volume change", videoRef?.current?.volume);
+    console.log("volume change");
     event.stopPropagation();
 
     let volumeLevel = event.target.value;
@@ -40,8 +67,7 @@ export default function Home() {
   };
 
   const togglePlayPause = (event) => {
-    // console.log("play pause", videoRef?.current?.volume);
-
+    console.log("play pause");
     event.stopPropagation();
 
     // If video is paused then make it play and vice versa
@@ -55,8 +81,7 @@ export default function Home() {
   };
 
   const toggleFullScreen = (event) => {
-    // console.log("full screen");
-
+    console.log("full screen");
     event.stopPropagation();
 
     // If the video is not in full screen mode then request for full screen. Otherwise, exit it.
@@ -70,7 +95,7 @@ export default function Home() {
   };
 
   const togglePIP = (event) => {
-    // console.log("pip");
+    console.log("pip");
     event.stopPropagation();
 
     // If video is not in picture in picture mode then request for it. Otherwise, exit it.
@@ -84,7 +109,7 @@ export default function Home() {
   };
 
   const toggleMute = (event) => {
-    // console.log("mute");
+    console.log("mute");
     event.stopPropagation();
 
     // If video is muted then unmute it and vice versa.
@@ -110,6 +135,8 @@ export default function Home() {
           ref={videoRef}
           controls={false}
           width="100%"
+          onLoadedDataCapture={getTotalDuration}
+          onTimeUpdate={getCurrentDuration}
           height={isFullScreen ? "100vh" : "800"}
           className="rounded-md pointer-events-none"
         >
@@ -121,6 +148,7 @@ export default function Home() {
           isMuted={isMuted}
           isPlaying={isPlaying}
           isFullScreen={isFullScreen}
+          currentDuration={currentDuration}
           togglePlayPause={togglePlayPause}
           toggleFullScreen={toggleFullScreen}
           togglePIP={togglePIP}
@@ -138,6 +166,7 @@ const Controls = ({
   isMuted,
   isPlaying,
   isFullScreen,
+  currentDuration,
   toggleFullScreen,
   togglePlayPause,
   togglePIP,
@@ -146,77 +175,84 @@ const Controls = ({
 }) => {
   return (
     <div
-      className={`py-2 w-full px-3 flex justify-between absolute bottom-0 left-0 right-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/50 z-[100]
-      ${isPlaying && "opacity-0"}`}
+      className={`flex flex-col justify-betweenpt-2 w-full absolute bottom-0 left-0 right-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/50 z-50
+    ${isPlaying && "opacity-0"}`}
     >
-      <div className="flex gap-4">
-        <div onClick={togglePlayPause} className="cursor-pointer">
-          {isPlaying ? (
-            <PauseIcon color="white" width={24} height={24} />
-          ) : (
-            <PlayIcon color="white" width={24} height={24} />
-          )}
+      <div className="w-full h-2 bg-red-400" />
+      <div className={`py-2 w-full px-3 flex justify-between`}>
+        <div className="flex gap-4">
+          <div onClick={togglePlayPause} className="cursor-pointer">
+            {isPlaying ? (
+              <PauseIcon color="white" width={24} height={24} />
+            ) : (
+              <PlayIcon color="white" width={24} height={24} />
+            )}
+          </div>
+
+          <div className="cursor-pointer flex">
+            {isMuted || volume === 0 ? (
+              <SpeakerOffIcon
+                onClick={toggleMute}
+                color="white"
+                width={24}
+                height={24}
+              />
+            ) : volume > 0.8 ? (
+              <SpeakerLoudIcon
+                onClick={toggleMute}
+                color="white"
+                width={24}
+                height={24}
+              />
+            ) : volume > 0.4 ? (
+              <SpeakerModerateIcon
+                onClick={toggleMute}
+                color="white"
+                width={24}
+                height={24}
+              />
+            ) : (
+              <SpeakerQuietIcon
+                onClick={toggleMute}
+                color="white"
+                width={24}
+                height={24}
+              />
+            )}
+          </div>
+          <input
+            name="points"
+            type="range"
+            id="points"
+            step={"any"}
+            min="0"
+            max="1"
+            className="z-50"
+            value={volume}
+            onChange={handleVolumeChange}
+          />
+
+          <div className="flex gap-2 text-xl text-white">
+            <div>{currentDuration || "00:00"}</div>/<div>01:00</div>
+          </div>
         </div>
 
-        <div className="cursor-pointer flex">
-          {isMuted || volume === 0 ? (
-            <SpeakerOffIcon
-              onClick={toggleMute}
-              color="white"
-              width={24}
-              height={24}
-            />
-          ) : volume > 0.8 ? (
-            <SpeakerLoudIcon
-              onClick={toggleMute}
-              color="white"
-              width={24}
-              height={24}
-            />
-          ) : volume > 0.4 ? (
-            <SpeakerModerateIcon
-              onClick={toggleMute}
-              color="white"
-              width={24}
-              height={24}
-            />
-          ) : (
-            <SpeakerQuietIcon
-              onClick={toggleMute}
-              color="white"
-              width={24}
-              height={24}
-            />
-          )}
-        </div>
-        <input
-          name="points"
-          type="range"
-          id="points"
-          step={"any"}
-          min="0"
-          max="1"
-          className="z-50"
-          value={volume}
-          onChange={handleVolumeChange}
-        />
-      </div>
+        <div className="flex gap-4">
+          <div onClick={togglePIP} className="cursor-pointer">
+            {isPIP ? (
+              <DesktopIcon color="white" width={24} height={24} />
+            ) : (
+              <LaptopIcon color="white" width={24} height={24} />
+            )}
+          </div>
 
-      <div className="flex gap-4">
-        <div onClick={togglePIP} className="cursor-pointer">
-          {isPIP ? (
-            <DesktopIcon color="white" width={24} height={24} />
-          ) : (
-            <LaptopIcon color="white" width={24} height={24} />
-          )}
-        </div>
-
-        <div onClick={toggleFullScreen} className="cursor-pointer">
-          {isFullScreen ? (
-            <ExitFullScreenIcon color="white" width={24} height={24} />
-          ) : (
-            <EnterFullScreenIcon color="white" width={24} height={24} />
-          )}
+          <div onClick={toggleFullScreen} className="cursor-pointer">
+            {isFullScreen ? (
+              <ExitFullScreenIcon color="white" width={24} height={24} />
+            ) : (
+              <EnterFullScreenIcon color="white" width={24} height={24} />
+            )}
+          </div>
         </div>
       </div>
     </div>
