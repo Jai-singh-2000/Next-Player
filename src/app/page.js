@@ -23,6 +23,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const playPercentRef = useRef(null);
   const [currentDuration, setCurrentDuration] = useState("00:00");
 
   const getTotalDuration = () => {
@@ -33,6 +34,12 @@ export default function Home() {
   const getCurrentDuration = () => {
     const time = formatDuration(videoRef?.current?.currentTime);
     setCurrentDuration(time);
+
+    const percentInFloat =
+      videoRef?.current?.currentTime / videoRef?.current?.duration;
+    const percent = percentInFloat * 100;
+    playPercentRef.current.style.width = percent + "%";
+    // setplayPercentRef()
   };
 
   const formatDuration = (time) => {
@@ -136,7 +143,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex justify-center items-center bg-slate-300 ">
       <div
         ref={videoContainerRef}
         className="relative group max-h-[100svh] max-w-[1000px] bg-black w-full flex justify-center"
@@ -158,8 +165,9 @@ export default function Home() {
           isPIP={isPIP}
           isMuted={isMuted}
           isPlaying={isPlaying}
-          playbackSpeed={playbackSpeed}
           isFullScreen={isFullScreen}
+          playPercentRef={playPercentRef}
+          playbackSpeed={playbackSpeed}
           currentDuration={currentDuration}
           togglePlayPause={togglePlayPause}
           togglePlaybackSpeed={togglePlaybackSpeed}
@@ -178,6 +186,7 @@ const Controls = ({
   isPIP,
   isMuted,
   isPlaying,
+  playPercentRef,
   isFullScreen,
   playbackSpeed,
   currentDuration,
@@ -190,11 +199,21 @@ const Controls = ({
 }) => {
   return (
     <div
-      className={`flex flex-col justify-betweenpt-2 w-full absolute bottom-0 left-0 right-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/50 z-50
+      className={`flex flex-col justify-betweenpt-2 w-full absolute bottom-0 left-0 right-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/10 z-50 py-2
     ${isPlaying && "opacity-0"}`}
     >
-      <div className="w-full h-2 bg-red-400" />
-      <div className={`py-2 w-full px-3 flex justify-between`}>
+      <div className="w-full bg-black/10 absolute h-32 -top-20" />
+
+      <div className="relative group z-50 w-full">
+        <div
+          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute top-0`}
+        />
+        <div
+          ref={playPercentRef}
+          className={`  h-[6px] group-hover:py-1 bg-[#ff0000] z-50 absolute top-0`}
+        />
+      </div>
+      <div className={`py-4 w-full px-3 flex justify-between z-50`}>
         <div className="flex gap-4">
           <div onClick={togglePlayPause} className="cursor-pointer">
             {isPlaying ? (
