@@ -17,11 +17,12 @@ import video from "../../assets/telegram.mp4";
 export default function Home() {
   const videoRef = useRef(null);
   const videoContainerRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [volume, setVolume] = useState(1);
   const [isPIP, setIsPIP] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [currentDuration, setCurrentDuration] = useState("00:00");
 
   const getTotalDuration = () => {
@@ -78,6 +79,16 @@ export default function Home() {
       videoRef.current.pause();
       setIsPlaying(false);
     }
+  };
+
+  const togglePlaybackSpeed = (event) => {
+    event.stopPropagation();
+    const currentSpeed = videoRef.current.playbackRate;
+    let newSpeed = currentSpeed + 0.25;
+    if (currentSpeed === 2) newSpeed = 0.25;
+
+    videoRef.current.playbackRate = newSpeed;
+    setPlaybackSpeed(newSpeed);
   };
 
   const toggleFullScreen = (event) => {
@@ -147,9 +158,11 @@ export default function Home() {
           isPIP={isPIP}
           isMuted={isMuted}
           isPlaying={isPlaying}
+          playbackSpeed={playbackSpeed}
           isFullScreen={isFullScreen}
           currentDuration={currentDuration}
           togglePlayPause={togglePlayPause}
+          togglePlaybackSpeed={togglePlaybackSpeed}
           toggleFullScreen={toggleFullScreen}
           togglePIP={togglePIP}
           toggleMute={toggleMute}
@@ -166,8 +179,10 @@ const Controls = ({
   isMuted,
   isPlaying,
   isFullScreen,
+  playbackSpeed,
   currentDuration,
   toggleFullScreen,
+  togglePlaybackSpeed,
   togglePlayPause,
   togglePIP,
   toggleMute,
@@ -238,6 +253,13 @@ const Controls = ({
         </div>
 
         <div className="flex gap-4">
+          <div
+            onClick={togglePlaybackSpeed}
+            className="cursor-pointer text-white text-xl"
+          >
+            {playbackSpeed}x
+          </div>
+
           <div onClick={togglePIP} className="cursor-pointer">
             {isPIP ? (
               <DesktopIcon color="white" width={24} height={24} />
