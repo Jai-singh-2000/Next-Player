@@ -1,19 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import {
-  PlayIcon,
-  PauseIcon,
-  EnterFullScreenIcon,
-  ExitFullScreenIcon,
-  DesktopIcon,
-  LaptopIcon,
-  SpeakerLoudIcon,
-  SpeakerOffIcon,
-  SpeakerQuietIcon,
-  SpeakerModerateIcon,
-} from "@radix-ui/react-icons";
 import video1 from "../../assets/video1.mp4";
 import video2 from "../../assets/video2.mp4";
+import video3 from "../../assets/video3.mp4";
+import VideoCard from "@/components/Cards/VideoCard";
+import Controls from "@/components/Control/Control";
 
 export default function Home() {
   const videoRef = useRef(null);
@@ -42,6 +33,7 @@ export default function Home() {
   const getTotalDuration = () => {
     const time = formatDuration(videoRef?.current?.duration);
     setTotalDuration(time);
+    setIsPlaying(true);
   };
 
   const getCurrentDuration = () => {
@@ -77,7 +69,6 @@ export default function Home() {
     }
 
     let volumeLevel = event.target.value;
-    console.log(volumeLevel);
     setVolume(volumeLevel);
     videoRef.current.volume = event.target.value; // Set the volume level
 
@@ -202,203 +193,74 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    setAllVideos([video1, video2]);
+    setAllVideos([video1, video2, video3]);
 
     //At first time onLoadedData Event not working that's why again load video after render
     videoRef.current.load();
   }, []);
 
   return (
-    <div className="flex flex-col lg:flex-row">
-      <div
-        ref={videoContainerRef}
-        className="relative group h-[100vh] flex-1 md:flex-[0.7] bg-black w-full flex justify-center"
-        onClick={togglePlayPause}
-      >
-        <video
-          ref={videoRef}
-          controls={false}
-          width="100%"
-          autoPlay
-          onLoadedData={getTotalDuration}
-          onTimeUpdate={getCurrentDuration}
-          height={isFullScreen ? "100vh" : "800"}
-          className="rounded-md"
-        >
-          <source src={video1} type="video/mp4" />
-        </video>
-        <Controls
-          volume={volume}
-          isPIP={isPIP}
-          isMuted={isMuted}
-          isPlaying={isPlaying}
-          isFullScreen={isFullScreen}
-          playPercentRef={playPercentRef}
-          playbackSpeed={playbackSpeed}
-          currentDuration={currentDuration}
-          totalDuration={totalDuration}
-          togglePlayPause={togglePlayPause}
-          togglePlaybackSpeed={togglePlaybackSpeed}
-          toggleFullScreen={toggleFullScreen}
-          togglePIP={togglePIP}
-          toggleMute={toggleMute}
-          handleVolumeChange={handleVolumeChange}
-        />
+    <div className="flex flex-col  min-h-screen w-full bg-gradient-to-r from-violet-200 to-pink-200">
+      <div className="h-[15vh] text-5xl text-gray-700 font-mono flex justify-center items-center font-semibold">
+        Next Player
       </div>
-      <div className="flex-[0.3] h-full flex flex-col gap-4 px-4 pt-12">
-        {allVideos?.map((src, index) => {
-          return (
-            <VideoCard
-              src={src}
-              number={index + 1}
-              handleChangeVideo={handleChangeVideo}
-            />
-          );
-        })}
+      <div className="flex flex-col items-center gap-8 xl:flex-row | xl:h-[80vh] px-6">
+        <div
+          ref={videoContainerRef}
+          className="relative group flex-1 md:flex-[0.7] h-full bg-black w-[95%] xl:w-full flex rounded-xl justify-center items-center"
+          onClick={togglePlayPause}
+        >
+          <video
+            ref={videoRef}
+            controls={false}
+            width="100%"
+            autoPlay
+            onLoadedData={getTotalDuration}
+            onTimeUpdate={getCurrentDuration}
+            height={isFullScreen ? "100vh" : "800"}
+            className="rounded-md "
+          >
+            <source src={video1} type="video/mp4" />
+          </video>
+          <Controls
+            volume={volume}
+            isPIP={isPIP}
+            isMuted={isMuted}
+            isPlaying={isPlaying}
+            isFullScreen={isFullScreen}
+            playPercentRef={playPercentRef}
+            playbackSpeed={playbackSpeed}
+            currentDuration={currentDuration}
+            totalDuration={totalDuration}
+            togglePlayPause={togglePlayPause}
+            togglePlaybackSpeed={togglePlaybackSpeed}
+            toggleFullScreen={toggleFullScreen}
+            togglePIP={togglePIP}
+            toggleMute={toggleMute}
+            handleVolumeChange={handleVolumeChange}
+          />
+        </div>
+
+        <div className="flex-[0.3] box-border px-4 h-full w-full">
+          <div className=" px-4 pt-4 bg-white/50 rounded-sm h-full">
+            <div className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-600 font-semibold pb-6 font-mono">
+              Playlist
+            </div>
+
+            <div className="xl:max-h-[70vh] overflow-y-auto flex flex-col gap-4">
+              {allVideos?.map((src, index) => {
+                return (
+                  <VideoCard
+                    src={src}
+                    number={index + 1}
+                    handleChangeVideo={handleChangeVideo}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
-const VideoCard = ({ src, number = 1, handleChangeVideo }) => {
-  return (
-    <div
-      className="w-full bg-blue-100 h-20 flex cursor-pointer"
-      onClick={() => handleChangeVideo(src)}
-    >
-      <div className="flex-[0.3] bg-black">
-        <video className="rounded-md pointer-events-none w-full h-full">
-          <source src={src} type="video/mp4" />
-        </video>
-      </div>
-      <div className="flex-[0.7] font-medium p-2">
-        <div>Video{number}</div>
-      </div>
-    </div>
-  );
-};
-
-const Controls = ({
-  volume,
-  isPIP,
-  isMuted,
-  isPlaying,
-  playPercentRef,
-  isFullScreen,
-  playbackSpeed,
-  currentDuration,
-  totalDuration,
-  toggleFullScreen,
-  togglePlaybackSpeed,
-  togglePlayPause,
-  togglePIP,
-  toggleMute,
-  handleVolumeChange,
-}) => {
-  return (
-    <div
-      className={`flex flex-col justify-betweenpt-2 w-full absolute bottom-0 left-0 right-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/10 z-50 py-2
-    ${isPlaying && "opacity-0"}`}
-    >
-      <div className="w-full bg-black/20 absolute h-32 -top-20 z-10" />
-
-      {/* TimeLine Design */}
-      <div className="relative group w-full z-50 flex items-center min-h-[16px]">
-        <div
-          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute`}
-        />
-
-        <div
-          ref={playPercentRef}
-          className={`h-[6px] group-hover:py-1 bg-[#ff0000] z-50`}
-        />
-        <div className="size-4 bg-[#ff0000] rounded-full z-50 hidden group-hover:block" />
-      </div>
-
-      {/* Controls Icons */}
-      <div className={`py-4 w-full px-3 flex justify-between z-50`}>
-        <div className="flex gap-4">
-          <div onClick={togglePlayPause} className="cursor-pointer">
-            {isPlaying ? (
-              <PauseIcon color="white" width={24} height={24} />
-            ) : (
-              <PlayIcon color="white" width={24} height={24} />
-            )}
-          </div>
-
-          <div className="cursor-pointer flex">
-            {isMuted || volume === 0 ? (
-              <SpeakerOffIcon
-                onClick={toggleMute}
-                color="white"
-                width={24}
-                height={24}
-              />
-            ) : volume > 0.8 ? (
-              <SpeakerLoudIcon
-                onClick={toggleMute}
-                color="white"
-                width={24}
-                height={24}
-              />
-            ) : volume > 0.4 ? (
-              <SpeakerModerateIcon
-                onClick={toggleMute}
-                color="white"
-                width={24}
-                height={24}
-              />
-            ) : (
-              <SpeakerQuietIcon
-                onClick={toggleMute}
-                color="white"
-                width={24}
-                height={24}
-              />
-            )}
-          </div>
-          <input
-            name="points"
-            type="range"
-            id="points"
-            step={"any"}
-            min="0"
-            max="1"
-            className="z-50"
-            value={volume}
-            onChange={handleVolumeChange}
-          />
-
-          <div className="flex gap-2 text-xl text-white">
-            <div>{currentDuration || "00:00"}</div>/<div>{totalDuration}</div>
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <div
-            onClick={togglePlaybackSpeed}
-            className="cursor-pointer text-white text-xl"
-          >
-            {playbackSpeed}x
-          </div>
-
-          <div onClick={togglePIP} className="cursor-pointer">
-            {isPIP ? (
-              <DesktopIcon color="white" width={24} height={24} />
-            ) : (
-              <LaptopIcon color="white" width={24} height={24} />
-            )}
-          </div>
-
-          <div onClick={toggleFullScreen} className="cursor-pointer">
-            {isFullScreen ? (
-              <ExitFullScreenIcon color="white" width={24} height={24} />
-            ) : (
-              <EnterFullScreenIcon color="white" width={24} height={24} />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
