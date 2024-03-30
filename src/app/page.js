@@ -251,6 +251,7 @@ export default function Home() {
               {allVideos?.map((src, index) => {
                 return (
                   <VideoCard
+                    key={index}
                     src={src}
                     number={index + 1}
                     handleChangeVideo={handleChangeVideo}
