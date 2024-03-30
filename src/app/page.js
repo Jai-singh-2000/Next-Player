@@ -30,9 +30,10 @@ export default function Home() {
   const [currentDuration, setCurrentDuration] = useState("00:00");
   const [totalDuration, setTotalDuration] = useState("00:00");
 
-  const handleCurrentVideo = (src) => {
+  const handleChangeVideo = (src) => {
     if (videoRef.current) {
       videoRef.current.src = src;
+
       // Call load() to reload the video with the new source
       videoRef.current.load();
     }
@@ -71,9 +72,12 @@ export default function Home() {
 
   const handleVolumeChange = (event) => {
     console.log("volume change");
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
 
     let volumeLevel = event.target.value;
+    console.log(volumeLevel);
     setVolume(volumeLevel);
     videoRef.current.volume = event.target.value; // Set the volume level
 
@@ -87,7 +91,9 @@ export default function Home() {
 
   const togglePlayPause = (event) => {
     console.log("play pause");
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
 
     // If video is paused then make it play and vice versa
     if (videoRef?.current?.paused) {
@@ -100,7 +106,9 @@ export default function Home() {
   };
 
   const togglePlaybackSpeed = (event) => {
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
     const currentSpeed = videoRef.current.playbackRate;
     let newSpeed = currentSpeed + 0.25;
     if (currentSpeed === 2) newSpeed = 0.25;
@@ -111,7 +119,9 @@ export default function Home() {
 
   const toggleFullScreen = (event) => {
     console.log("full screen");
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
 
     // If the video is not in full screen mode then request for full screen. Otherwise, exit it.
     if (document?.fullscreenElement === null) {
@@ -125,7 +135,9 @@ export default function Home() {
 
   const togglePIP = (event) => {
     console.log("pip");
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
 
     // If video is not in picture in picture mode then request for it. Otherwise, exit it.
     if (!document?.pictureInPictureElement) {
@@ -139,7 +151,9 @@ export default function Home() {
 
   const toggleMute = (event) => {
     console.log("mute");
-    event.stopPropagation();
+    if (event) {
+      event.stopPropagation();
+    }
 
     // If video is muted then unmute it and vice versa.
     videoRef.current.muted = !videoRef.current.muted;
@@ -153,15 +167,52 @@ export default function Home() {
     }
   };
 
+  const skipSeconds = (duration) => {
+    videoRef.current.currentTime += duration;
+  };
+
+  useEffect(() => {
+    // Function to handle key down events
+    const handleKeyDown = (event) => {
+      const pressedKey = event.key;
+      console.log(pressedKey);
+
+      if (pressedKey === " " || pressedKey === "k") {
+        togglePlayPause();
+      } else if (pressedKey === "m") {
+        toggleMute();
+      } else if (pressedKey === "f") {
+        toggleFullScreen();
+      } else if (pressedKey === "p") {
+        togglePIP();
+      } else if (pressedKey === "ArrowLeft" || pressedKey === "j") {
+        skipSeconds(-5);
+      } else if (pressedKey === "ArrowRight" || pressedKey === "l") {
+        skipSeconds(5);
+      }
+    };
+
+    // Add event listener to the document
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Clean up function to remove event listener when component unmounts
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     setAllVideos([video1, video2]);
+
+    //At first time onLoadedData Event not working that's why again load video after render
+    videoRef.current.load();
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex flex-col lg:flex-row">
       <div
         ref={videoContainerRef}
-        className="relative group h-[100vh] flex-[0.7] bg-black w-full flex justify-center"
+        className="relative group h-[100vh] flex-1 md:flex-[0.7] bg-black w-full flex justify-center"
         onClick={togglePlayPause}
       >
         <video
@@ -172,7 +223,7 @@ export default function Home() {
           onLoadedData={getTotalDuration}
           onTimeUpdate={getCurrentDuration}
           height={isFullScreen ? "100vh" : "800"}
-          className="rounded-md pointer-events-none"
+          className="rounded-md"
         >
           <source src={video1} type="video/mp4" />
         </video>
@@ -194,13 +245,13 @@ export default function Home() {
           handleVolumeChange={handleVolumeChange}
         />
       </div>
-      <div className="flex-[0.3] h-full flex flex-col gap-4 px-4">
+      <div className="flex-[0.3] h-full flex flex-col gap-4 px-4 pt-12">
         {allVideos?.map((src, index) => {
           return (
             <VideoCard
               src={src}
               number={index + 1}
-              handleCurrentVideo={handleCurrentVideo}
+              handleChangeVideo={handleChangeVideo}
             />
           );
         })}
@@ -209,17 +260,14 @@ export default function Home() {
   );
 }
 
-const VideoCard = ({ src, number = 1, handleCurrentVideo }) => {
+const VideoCard = ({ src, number = 1, handleChangeVideo }) => {
   return (
     <div
       className="w-full bg-blue-100 h-20 flex cursor-pointer"
-      onClick={() => handleCurrentVideo(src)}
+      onClick={() => handleChangeVideo(src)}
     >
       <div className="flex-[0.3] bg-black">
-        <video
-          controls
-          className="rounded-md pointer-events-none w-full h-full"
-        >
+        <video className="rounded-md pointer-events-none w-full h-full">
           <source src={src} type="video/mp4" />
         </video>
       </div>
@@ -255,19 +303,14 @@ const Controls = ({
       <div className="w-full bg-black/20 absolute h-32 -top-20 z-10" />
 
       {/* TimeLine Design */}
-      <div
-        className="relative group w-full z-50 flex items-center min-h-[16px]"
-        onClick={() => {
-          console.log("aaya");
-        }}
-      >
+      <div className="relative group w-full z-50 flex items-center min-h-[16px]">
         <div
-          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute cursor-pointer`}
+          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute`}
         />
 
         <div
           ref={playPercentRef}
-          className={`h-[6px] group-hover:py-1 bg-[#ff0000] z-50 cursor-pointer`}
+          className={`h-[6px] group-hover:py-1 bg-[#ff0000] z-50`}
         />
         <div className="size-4 bg-[#ff0000] rounded-full z-50 hidden group-hover:block" />
       </div>
