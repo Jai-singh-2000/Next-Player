@@ -1,6 +1,6 @@
 # Next Player Live
 
-Not deployed 
+[Next Player](https://next-player-jai.netlify.app/)
 
 ## Next Player
 
