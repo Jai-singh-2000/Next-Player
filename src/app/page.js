@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PlayIcon,
   PauseIcon,
@@ -12,10 +12,14 @@ import {
   SpeakerQuietIcon,
   SpeakerModerateIcon,
 } from "@radix-ui/react-icons";
-import video from "../../assets/telegram.mp4";
+import video1 from "../../assets/video1.mp4";
+import video2 from "../../assets/video2.mp4";
 
 export default function Home() {
   const videoRef = useRef(null);
+  const playPercentRef = useRef(null);
+  const [allVideos, setAllVideos] = useState([]);
+
   const videoContainerRef = useRef(null);
   const [volume, setVolume] = useState(1);
   const [isPIP, setIsPIP] = useState(false);
@@ -23,12 +27,21 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const playPercentRef = useRef(null);
   const [currentDuration, setCurrentDuration] = useState("00:00");
+  const [totalDuration, setTotalDuration] = useState("00:00");
+  console.log(totalDuration, "total duration");
+
+  const handleCurrentVideo = (src) => {
+    if (videoRef.current) {
+      videoRef.current.src = src;
+      // Call load() to reload the video with the new source
+      videoRef.current.load();
+    }
+  };
 
   const getTotalDuration = () => {
     const time = formatDuration(videoRef?.current?.duration);
-    console.log(time, "total time");
+    setTotalDuration(time);
   };
 
   const getCurrentDuration = () => {
@@ -39,7 +52,6 @@ export default function Home() {
       videoRef?.current?.currentTime / videoRef?.current?.duration;
     const percent = percentInFloat * 100;
     playPercentRef.current.style.width = percent + "%";
-    // setplayPercentRef()
   };
 
   const formatDuration = (time) => {
@@ -77,6 +89,7 @@ export default function Home() {
   const togglePlayPause = (event) => {
     console.log("play pause");
     event.stopPropagation();
+    console.log(videoRef.current);
 
     // If video is paused then make it play and vice versa
     if (videoRef?.current?.paused) {
@@ -142,23 +155,28 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    setAllVideos([video1, video2]);
+  }, []);
+
   return (
-    <div className="flex justify-center items-center bg-slate-300 ">
+    <div className="flex">
       <div
         ref={videoContainerRef}
-        className="relative group max-h-[100svh] max-w-[1000px] bg-black w-full flex justify-center"
+        className="relative group h-[100vh] flex-[0.7] bg-black w-full flex justify-center"
         onClick={togglePlayPause}
       >
         <video
           ref={videoRef}
           controls={false}
           width="100%"
-          onLoadedDataCapture={getTotalDuration}
+          autoPlay
+          onLoadedData={getTotalDuration}
           onTimeUpdate={getCurrentDuration}
           height={isFullScreen ? "100vh" : "800"}
           className="rounded-md pointer-events-none"
         >
-          <source src={video} type="video/mp4" />
+          <source src={video1} type="video/mp4" />
         </video>
         <Controls
           volume={volume}
@@ -169,6 +187,7 @@ export default function Home() {
           playPercentRef={playPercentRef}
           playbackSpeed={playbackSpeed}
           currentDuration={currentDuration}
+          totalDuration={totalDuration}
           togglePlayPause={togglePlayPause}
           togglePlaybackSpeed={togglePlaybackSpeed}
           toggleFullScreen={toggleFullScreen}
@@ -177,9 +196,41 @@ export default function Home() {
           handleVolumeChange={handleVolumeChange}
         />
       </div>
+      <div className="flex-[0.3] h-full flex flex-col gap-4 px-4">
+        {allVideos?.map((src, index) => {
+          return (
+            <VideoCard
+              src={src}
+              number={index + 1}
+              handleCurrentVideo={handleCurrentVideo}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
+
+const VideoCard = ({ src, number = 1, handleCurrentVideo }) => {
+  return (
+    <div
+      className="w-full bg-blue-100 h-20 flex cursor-pointer"
+      onClick={() => handleCurrentVideo(src)}
+    >
+      <div className="flex-[0.3] bg-black">
+        <video
+          controls
+          className="rounded-md pointer-events-none w-full h-full"
+        >
+          <source src={src} type="video/mp4" />
+        </video>
+      </div>
+      <div className="flex-[0.7] font-medium p-2">
+        <div>Video{number}</div>
+      </div>
+    </div>
+  );
+};
 
 const Controls = ({
   volume,
@@ -190,6 +241,7 @@ const Controls = ({
   isFullScreen,
   playbackSpeed,
   currentDuration,
+  totalDuration,
   toggleFullScreen,
   togglePlaybackSpeed,
   togglePlayPause,
@@ -213,6 +265,7 @@ const Controls = ({
           className={`  h-[6px] group-hover:py-1 bg-[#ff0000] z-50 absolute top-0`}
         />
       </div>
+
       <div className={`py-4 w-full px-3 flex justify-between z-50`}>
         <div className="flex gap-4">
           <div onClick={togglePlayPause} className="cursor-pointer">
@@ -267,7 +320,7 @@ const Controls = ({
           />
 
           <div className="flex gap-2 text-xl text-white">
-            <div>{currentDuration || "00:00"}</div>/<div>01:00</div>
+            <div>{currentDuration || "00:00"}</div>/<div>{totalDuration}</div>
           </div>
         </div>
 
