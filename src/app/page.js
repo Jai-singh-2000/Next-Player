@@ -18,9 +18,9 @@ import video2 from "../../assets/video2.mp4";
 export default function Home() {
   const videoRef = useRef(null);
   const playPercentRef = useRef(null);
+  const videoContainerRef = useRef(null);
   const [allVideos, setAllVideos] = useState([]);
 
-  const videoContainerRef = useRef(null);
   const [volume, setVolume] = useState(1);
   const [isPIP, setIsPIP] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -29,7 +29,6 @@ export default function Home() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [currentDuration, setCurrentDuration] = useState("00:00");
   const [totalDuration, setTotalDuration] = useState("00:00");
-  console.log(totalDuration, "total duration");
 
   const handleCurrentVideo = (src) => {
     if (videoRef.current) {
@@ -89,7 +88,6 @@ export default function Home() {
   const togglePlayPause = (event) => {
     console.log("play pause");
     event.stopPropagation();
-    console.log(videoRef.current);
 
     // If video is paused then make it play and vice versa
     if (videoRef?.current?.paused) {
@@ -254,18 +252,27 @@ const Controls = ({
       className={`flex flex-col justify-betweenpt-2 w-full absolute bottom-0 left-0 right-0  group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-75 ease-in-out delay-75 bg-black/10 z-50 py-2
     ${isPlaying && "opacity-0"}`}
     >
-      <div className="w-full bg-black/10 absolute h-32 -top-20" />
+      <div className="w-full bg-black/20 absolute h-32 -top-20 z-10" />
 
-      <div className="relative group z-50 w-full">
+      {/* TimeLine Design */}
+      <div
+        className="relative group w-full z-50 flex items-center min-h-[16px]"
+        onClick={() => {
+          console.log("aaya");
+        }}
+      >
         <div
-          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute top-0`}
+          className={`w-full h-[6px] group-hover:py-1 bg-[#aea8a8] absolute cursor-pointer`}
         />
+
         <div
           ref={playPercentRef}
-          className={`  h-[6px] group-hover:py-1 bg-[#ff0000] z-50 absolute top-0`}
+          className={`h-[6px] group-hover:py-1 bg-[#ff0000] z-50 cursor-pointer`}
         />
+        <div className="size-4 bg-[#ff0000] rounded-full z-50 hidden group-hover:block" />
       </div>
 
+      {/* Controls Icons */}
       <div className={`py-4 w-full px-3 flex justify-between z-50`}>
         <div className="flex gap-4">
           <div onClick={togglePlayPause} className="cursor-pointer">
